@@ -16,6 +16,8 @@ use hal::timer::TimerCounter;
 
 use matrix_display::*;
 
+mod best_font;
+
 type SPI = SPIMaster4<Sercom4Pad0<Pa12<PfD>>, Sercom4Pad2<Pb10<PfD>>, Sercom4Pad3<Pb11<PfD>>>;
 type LEDPin = Pa17<Output<OpenDrain>>;
 
@@ -96,7 +98,8 @@ fn setup() -> (
     ];
 
     let array = LEDArray {
-        array: image, //[[0; 16]; 8],
+        // array: image,
+        array: [[0; 16]; 8],
         row_pins,
         timer,
         spi,
@@ -105,6 +108,15 @@ fn setup() -> (
     };
 
     (red_led, tc5, array)
+}
+
+fn scroll(frame_num: usize, image: &[&mut [u8]; 8], frame_buf: &mut [[u8; 16]; 8]) {
+    for r in 0..frame_buf.len() {
+        for c in 0..frame_buf[r].len() {
+            let image_col = (c + frame_num) % image[r].len();
+            frame_buf[r][c] = image[r][image_col];
+        }
+    }
 }
 
 #[entry]
@@ -128,13 +140,22 @@ fn main() -> ! {
     red_led.set_high().unwrap();
     array.timer.start(1.hz());
 
-    // let mut pos = 127;
+    let mut frame_num = 0_usize;
+    let mut image = [
+        &mut [0u8; 12][..],
+        &mut [0u8; 12][..],
+        &mut [0u8; 12][..],
+        &mut [0u8; 12][..],
+        &mut [0u8; 12][..],
+        &mut [0u8; 12][..],
+        &mut [0u8; 12][..],
+        &mut [0u8; 12][..],
+    ];
+    best_font::spell("H\u{1f}I", &mut image).unwrap();
 
     loop {
-        // array.array[pos >> 4][pos & 0xf] = 0;
-        // pos = (pos+1) % 128;
-        // array.array[pos >> 4][pos & 0xf] = 15;
-
+        scroll(frame_num / 4, &image, &mut array.array);
+        frame_num += 1;
         array.scan(DelayHertz(1000)).unwrap_or(());
     }
 }
