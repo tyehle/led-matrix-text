@@ -21,19 +21,6 @@ git = "https://github.com/tyehle/led-matrix-driver.git"
 rev = "ba8fef7"
 # path = "../matrix-display"
 
-# Uncomment for the panic example.
-# panic-itm = "0.4.1"
-
-# Uncomment for the allocator example.
-# alloc-cortex-m = "0.3.5"
-
-# Uncomment for the device example.
-# Update `memory.x`, set target to `thumbv7em-none-eabihf` in `.cargo/config`,
-# and then use `cargo build --examples device` to build it.
-# [dependencies.stm32f3]
-# features = ["stm32f303", "rt"]
-# version = "0.7.1"
-
 # this lets you use `cargo fix`!
 [[bin]]
 name = "led-matrix-hello"
