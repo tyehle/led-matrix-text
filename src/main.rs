@@ -121,7 +121,8 @@ fn scroll(frame_num: usize, image: &[&mut [u8]; 8], frame_buf: &mut [[u8; 16]; 8
 
 #[entry]
 fn main() -> ! {
-    let (mut red_led, mut timer, mut array) = setup();
+    let (mut red_led, mut _timer, mut array) = setup();
+    red_led.set_low().unwrap();
 
     #[derive(Clone, Copy)]
     struct DelayHertz(u32);
@@ -137,24 +138,24 @@ fn main() -> ! {
         }
     }
 
-    red_led.set_high().unwrap();
     array.timer.start(1.hz());
 
     let mut frame_num = 0_usize;
     let mut image = [
-        &mut [0u8; 12][..],
-        &mut [0u8; 12][..],
-        &mut [0u8; 12][..],
-        &mut [0u8; 12][..],
-        &mut [0u8; 12][..],
-        &mut [0u8; 12][..],
-        &mut [0u8; 12][..],
-        &mut [0u8; 12][..],
+        &mut [0u8; 48][..],
+        &mut [0u8; 48][..],
+        &mut [0u8; 48][..],
+        &mut [0u8; 48][..],
+        &mut [0u8; 48][..],
+        &mut [0u8; 48][..],
+        &mut [0u8; 48][..],
+        &mut [0u8; 48][..],
     ];
-    best_font::spell("H\u{1f}I", &mut image).unwrap();
+
+    best_font::spell("H\u{1f}e\u{1f}l\u{1f}l\u{1f}o", &mut image).unwrap();
 
     loop {
-        scroll(frame_num / 4, &image, &mut array.array);
+        scroll(frame_num / 2, &image, &mut array.array);
         frame_num += 1;
         array.scan(DelayHertz(1000)).unwrap_or(());
     }
