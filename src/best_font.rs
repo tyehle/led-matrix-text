@@ -3,6 +3,7 @@ use heapless::*;
 
 type Letter = [&'static [u8]; 8];
 
+/// 128 slots in the map causes the board to crash
 fn get_alphabet() -> Result<FnvIndexMap<char, Letter, U32>, &'static str> {
     let mut alphabet: FnvIndexMap<char, Letter, U32> = heapless::FnvIndexMap::new();
 
@@ -65,7 +66,7 @@ fn get_alphabet() -> Result<FnvIndexMap<char, Letter, U32>, &'static str> {
                 &[0x0, 0x0, 0xF, 0x0, 0x0],
                 &[0x0, 0x0, 0xF, 0x0, 0x0],
                 &[0x0, 0x0, 0xF, 0x0, 0x0],
-                &[0x0, 0x0, 0x0, 0xF, 0x0],
+                &[0x0, 0x0, 0xF, 0xF, 0x0],
                 &[0x0, 0x0, 0x0, 0x0, 0x0],
             ],
         )
@@ -94,28 +95,12 @@ fn get_alphabet() -> Result<FnvIndexMap<char, Letter, U32>, &'static str> {
             [
                 &[0x0, 0x0, 0xF, 0x0, 0x0],
                 &[0x0, 0x0, 0x0, 0x0, 0x0],
+                &[0x0, 0xF, 0xF, 0x0, 0x0],
                 &[0x0, 0x0, 0xF, 0x0, 0x0],
                 &[0x0, 0x0, 0xF, 0x0, 0x0],
                 &[0x0, 0x0, 0xF, 0x0, 0x0],
-                &[0x0, 0x0, 0xF, 0x0, 0x0],
-                &[0x0, 0x0, 0xF, 0x0, 0x0],
+                &[0x0, 0x0, 0xF, 0xF, 0x0],
                 &[0x0, 0x0, 0x0, 0x0, 0x0],
-            ],
-        )
-        .map_err(|_| "no space")?;
-
-    alphabet
-        .insert(
-            '\u{1f}',
-            [
-                &[0x0],
-                &[0x0],
-                &[0x0],
-                &[0x0],
-                &[0x0],
-                &[0x0],
-                &[0x0],
-                &[0x0],
             ],
         )
         .map_err(|_| "no space")?;
@@ -140,7 +125,8 @@ pub fn spell(word: &str, buffer: &mut [&mut [u8]; 8]) -> Result<(), &'static str
                 buffer[row][offset + col] = image[row][col];
             }
         }
-        offset += image_width;
+        // add one more column so there is space between letters
+        offset += image_width + 1;
     }
 
     Ok(())

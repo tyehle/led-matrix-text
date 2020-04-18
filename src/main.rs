@@ -54,7 +54,8 @@ fn setup() -> (
     let reg_pin = pins.d6.into_open_drain_output(&mut pins.port);
     let output_disable = pins.d5.into_open_drain_output(&mut pins.port);
 
-    let red_led = pins.d13.into_open_drain_output(&mut pins.port);
+    let mut red_led = pins.d13.into_open_drain_output(&mut pins.port);
+    red_led.set_low().unwrap();
 
     // Setup the timer
     let gclk0 = clocks.gclk0();
@@ -74,28 +75,6 @@ fn setup() -> (
         pins.miso,
         &mut pins.port,
     );
-
-    // let image = [
-    //     [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8],
-    //     [2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9],
-    //     [3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10],
-    //     [4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11],
-    //     [5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12],
-    //     [6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13],
-    //     [7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14],
-    //     [8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15],
-    // ];
-
-    let image = [
-        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-    ];
 
     let array = LEDArray {
         // array: image,
@@ -122,7 +101,6 @@ fn scroll(frame_num: usize, image: &[&mut [u8]; 8], frame_buf: &mut [[u8; 16]; 8
 #[entry]
 fn main() -> ! {
     let (mut red_led, mut _timer, mut array) = setup();
-    red_led.set_low().unwrap();
 
     #[derive(Clone, Copy)]
     struct DelayHertz(u32);
@@ -152,11 +130,12 @@ fn main() -> ! {
         &mut [0u8; 48][..],
     ];
 
-    best_font::spell("H\u{1f}e\u{1f}l\u{1f}l\u{1f}o", &mut image).unwrap();
+    best_font::spell("Hello", &mut image).unwrap();
 
     loop {
-        scroll(frame_num / 2, &image, &mut array.array);
+        scroll(frame_num / 3, &image, &mut array.array);
         frame_num += 1;
         array.scan(DelayHertz(1000)).unwrap_or(());
+        red_led.toggle();
     }
 }
